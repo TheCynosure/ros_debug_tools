@@ -10,12 +10,12 @@
 using cimg_library::CImg;
 using cimg_library::CImgDisplay;
 
-struct Table {
-    uint64_t width;
-    uint64_t height;
+struct WrappedImage {
+    const uint64_t width;
+    const uint64_t height;
     double resolution;
     CImg<double> values;
-    Table(const double range, const double resolution) :
+    WrappedImage(const double range, const double resolution) :
             width(floor((range * 2.0) / resolution)),
             height(floor((range * 2.0) / resolution)),
             resolution(resolution) {
@@ -24,7 +24,7 @@ struct Table {
       values = CImg<double>(width, height, 1, 1, 0.0);
     }
 
-    Table() : width(0), height(0), resolution(1) {}
+    WrappedImage() : width(0), height(0), resolution(1) {}
 
     inline uint64_t convertX(float x) const {
       return width / 2 + floor(x / resolution);
@@ -54,44 +54,57 @@ struct Table {
     }
 };
 
-Table GetTable(const vector<Vector2f>& pointcloud,
-               double range,
-               double resolution) {
-  Table table(range, resolution);
+WrappedImage GetTable(const vector<Vector2f>& pointcloud,
+                      double range,
+                      double resolution) {
+  WrappedImage table(range, resolution);
   for (const Vector2f& point : pointcloud) {
     table.SetPointValue(point, 1);
   }
   return table;
 }
 
-double largest_side(const vector<Vector2f>& points) {
-  double min_x = INFINITY;
-  double max_x = -INFINITY;
-  double min_y = INFINITY;
-  double max_y = -INFINITY;
+Vector2f furthest_point(const vector<Vector2f>& points) {
+  Vector2f point;
+  double dist = 0;
   for (const Vector2f& p : points) {
-    min_x = std::min(static_cast<double>(p.x()), min_x);
-    max_x = std::max(static_cast<double>(p.x()), max_x);
-    min_y = std::min(static_cast<double>(p.y()), min_y);
-    max_y = std::max(static_cast<double>(p.y()), max_y);
+    if (p.norm() > dist) {
+      dist = p.norm();
+      point = p;
+    }
   }
-  return std::max(max_y - min_y, max_x - min_x);
+  return point;
 }
 
-static CImgDisplay PubPoints(std::string display_name,
-                              const vector<Vector2f>& points) {
-  double width = largest_side(points);
+static WrappedImage DrawPoints(const vector<Vector2f>& points) {
+  double width = furthest_point(points).norm();
   // Plot the points in a display.
-  Table table = GetTable(points, width / 2, 0.03);
-  CImg<double> image = table.GetDebugImage();
-  if (image.width() > 400) {
-    image = image.resize_halfXY();
-  }
-  CImgDisplay display(image, display_name.c_str());
-  return display;
+  WrappedImage table = GetTable(points, width, 0.03);
+  return table;
 }
 
-static void WaitForClose(CImgDisplay display) {
+static WrappedImage DrawLine(const Vector2f& start_point, const Vector2f& end_point, WrappedImage image) {
+  double color[] = {1.0};
+  image.values.draw_line(image.convertX(start_point.x()),
+                         image.convertY(start_point.y()),
+                         image.convertX(end_point.x()),
+                         image.convertY(end_point.y()),
+                         color);
+  return image;
+}
+
+static WrappedImage DrawCovariance(const Vector2f& center,
+                                   const Eigen::Matrix2f& cov,
+                                   WrappedImage image) {
+  // Solve for the Eigen Vectors
+}
+
+static WrappedImage DrawCovariance(const Vector2f& center, const Eigen::Matrix2f& cov) {
+  // Default to 400x400 image
+}
+
+static void WaitForClose(WrappedImage image) {
+  cimg_library::CImgDisplay display(image.GetDebugImage());
   while (!display.is_closed()) {
     display.wait();
   }

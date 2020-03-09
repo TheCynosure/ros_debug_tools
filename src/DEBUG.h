@@ -11,7 +11,7 @@
  */
 
 #ifdef USING_ROS_DEBUG
-#include "ros_debug.h"
+#include "ROS_DEBUG_TOOLS/ros_debug.h"
 #else
 #include "ROS_DEBUG_TOOLS/cimg_debug.h"
 #endif

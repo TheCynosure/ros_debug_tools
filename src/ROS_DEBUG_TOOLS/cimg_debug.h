@@ -110,4 +110,15 @@ static void WaitForClose(WrappedImage image) {
   }
 }
 
+static void WaitForClose(std::vector<WrappedImage> images) {
+  std::vector<cimg_library::CImgDisplay> displays;
+  for(auto image : images) {
+    displays.emplace_back(image.GetDebugImage());
+    displays.at(displays.size() - 1).show();
+  }
+  while (!displays[0].is_closed()) {
+    displays[0].wait();
+  }
+}
+
 #endif //ROS_DEBUG_TOOLS_CIMG_DEBUG_H

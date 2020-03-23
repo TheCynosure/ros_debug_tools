@@ -121,4 +121,8 @@ static void WaitForClose(std::vector<WrappedImage> images) {
   }
 }
 
+static void SaveImage(std::string name, WrappedImage image) {
+  image.GetDebugImage().normalize(0, 255).save_bmp(name.c_str());
+}
+
 #endif //ROS_DEBUG_TOOLS_CIMG_DEBUG_H

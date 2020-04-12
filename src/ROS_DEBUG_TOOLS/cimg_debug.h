@@ -54,7 +54,7 @@ struct WrappedImage {
     }
 };
 
-WrappedImage GetTable(const vector<Vector2f>& pointcloud,
+inline WrappedImage GetTable(const vector<Vector2f>& pointcloud,
                       double range,
                       double resolution) {
   WrappedImage table(range, resolution);
@@ -64,7 +64,7 @@ WrappedImage GetTable(const vector<Vector2f>& pointcloud,
   return table;
 }
 
-Vector2f furthest_point(const vector<Vector2f>& points) {
+inline Vector2f furthest_point(const vector<Vector2f>& points) {
   Vector2f point;
   double dist = 0;
   for (const Vector2f& p : points) {
@@ -76,14 +76,14 @@ Vector2f furthest_point(const vector<Vector2f>& points) {
   return point;
 }
 
-static WrappedImage DrawPoints(const vector<Vector2f>& points) {
+inline WrappedImage DrawPoints(const vector<Vector2f>& points) {
   double width = furthest_point(points).norm();
   // Plot the points in a display.
   WrappedImage table = GetTable(points, width, 0.03);
   return table;
 }
 
-static WrappedImage DrawLine(const Vector2f& start_point, const Vector2f& end_point, WrappedImage image) {
+inline WrappedImage DrawLine(const Vector2f& start_point, const Vector2f& end_point, WrappedImage image) {
   double color[] = {1.0};
   image.values.draw_line(image.convertX(start_point.x()),
                          image.convertY(start_point.y()),
@@ -93,24 +93,24 @@ static WrappedImage DrawLine(const Vector2f& start_point, const Vector2f& end_po
   return image;
 }
 
-static WrappedImage DrawCovariance(const Vector2f& center,
+inline WrappedImage DrawCovariance(const Vector2f& center,
                                    const Eigen::Matrix2f& cov,
                                    WrappedImage image) {
   // Solve for the Eigen Vectors
 }
 
-static WrappedImage DrawCovariance(const Vector2f& center, const Eigen::Matrix2f& cov) {
+inline WrappedImage DrawCovariance(const Vector2f& center, const Eigen::Matrix2f& cov) {
   // Default to 400x400 image
 }
 
-static void WaitForClose(WrappedImage image) {
+inline void WaitForClose(WrappedImage image) {
   cimg_library::CImgDisplay display(image.GetDebugImage());
   while (!display.is_closed()) {
     display.wait();
   }
 }
 
-static void WaitForClose(std::vector<WrappedImage> images) {
+inline void WaitForClose(std::vector<WrappedImage> images) {
   std::vector<cimg_library::CImgDisplay> displays;
   for(auto image : images) {
     displays.emplace_back(image.GetDebugImage());
@@ -121,7 +121,7 @@ static void WaitForClose(std::vector<WrappedImage> images) {
   }
 }
 
-static void SaveImage(std::string name, WrappedImage image) {
+inline void SaveImage(std::string name, WrappedImage image) {
   image.GetDebugImage().normalize(0, 255).save_bmp(name.c_str());
 }
 
